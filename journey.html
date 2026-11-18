@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Journey | CallingPoint</title>
+    <meta name="description" content="View a shared UK National Rail and multi-modal journey on CallingPoint.">
+    <meta name="theme-color" content="#F2F2F7" id="meta-theme-color">
+    <link rel="icon" type="image/jpeg" href="./icons/icon.png">
+    <link rel="apple-touch-icon" href="./icons/icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="journey.js" defer></script>
+</head>
+<body>
+
+<!-- Dynamic TOC Brand Top Accent Bar -->
+<div id="top-brand-bar" class="top-brand-bar" aria-hidden="true"></div>
+
+<main class="page-container">
+
+    <!-- Loading Spinner Card (shown while decoding payload and fetching TOC data) -->
+    <section id="loading-card" class="card loading-card" role="status" aria-live="polite">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <p class="loading-text">Loading journey details…</p>
+    </section>
+
+    <!-- Error State Banner (shown only if link is missing or malformed) -->
+    <section id="error-banner" class="card error-card hidden" role="alert">
+        <div class="error-icon" aria-hidden="true">!</div>
+        <div class="error-content">
+            <h1 class="error-title">Invalid or Unsupported Journey Link</h1>
+            <p id="error-message" class="error-text">This shared journey link could not be decoded. Ask the sender to share the journey again from CallingPoint.</p>
+        </div>
+    </section>
+
+    <!-- Top Journey Summary Card -->
+    <section id="summary-card" class="card summary-card hidden" aria-label="Journey summary">
+        <div class="summary-topbar">
+            <a href="https://callingpoint.co.uk" class="icon-btn" aria-label="Back to CallingPoint" title="CallingPoint Home">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </a>
+
+            <h1 class="summary-heading">Journey details</h1>
+
+            <button type="button" id="btn-share" class="icon-btn" aria-label="Share journey" title="Copy journey link">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-endpoints">
+            <div class="endpoint-row">
+                <span class="endpoint-label">FROM</span>
+                <span id="from-name" class="endpoint-value">—</span>
+            </div>
+            <div class="endpoint-row">
+                <span class="endpoint-label">TO</span>
+                <span id="to-name" class="endpoint-value">—</span>
+            </div>
+            <div class="summary-meta-row">
+                <span id="journey-date" class="meta-date">Today</span>
+                <span id="journey-summary" class="meta-times">—</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Journey Timeline Card -->
+    <section id="timeline-card" class="card timeline-card hidden" aria-label="Journey timeline">
+        <h2 id="timeline-heading" class="timeline-heading">Journey timeline</h2>
+        <div id="legs-container" class="legs-container"></div>
+    </section>
+
+    <!-- Snapshot Timestamp -->
+    <p id="footer-status" class="footer-status hidden">Shared journey snapshot</p>
+
+    <!-- Download App / Beta Tester Card -->
+    <section class="card app-promo-card" aria-label="Get CallingPoint for Android">
+        <div class="app-promo-top">
+            <img src="./icons/icon.png" alt="CallingPoint App Icon" class="app-promo-icon">
+            <div class="app-promo-copy">
+                <h2 class="app-promo-title">Open in CallingPoint</h2>
+                <p class="app-promo-desc">Get live UK National Rail departure boards, smart multi-modal routing, and real-time disruption alerts on Android.</p>
+            </div>
+        </div>
+
+        <div class="app-promo-actions">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSchOmnqODe6E8r1wa-mXT27pOYXIdxRnwbWoYAg0f7Uba3g5A/viewform?usp=sharing&ouid=104885425055942157899"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="btn-tester">
+                Become a Tester
+            </a>
+
+            <div class="btn-play-disabled" aria-disabled="true" title="Coming soon to Google Play">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                    <path d="M3.61 1.814L13.793 12 3.61 22.186a1.98 1.98 0 0 1-.46-1.276V3.09c0-.49.174-.94.46-1.276zm11.244 11.245l2.634 2.634-11.49 6.535 8.856-9.169zm3.828-2.177l2.198 1.25c.63.358.63 1.378 0 1.736l-2.198 1.25-2.852-2.118 2.852-2.118zM5.998 1.772l11.49 6.535-2.634 2.634-8.856-9.169z"/>
+                </svg>
+                <span>Open in the app</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <img src="./icons/icon_outline.svg" alt="CallingPoint" class="footer-brand-icon">
+        <p class="copyright">&copy; 2026 CallingPoint.</p>
+        <p class="attributions">
+            Powered by data from the <strong>National Rail Data Portal</strong>,
+            <strong>Transport for London (TfL)</strong>,
+            <strong>OpenStreetMap</strong>, and
+            <strong>Transitous</strong>.
+        </p>
+        <div class="footer-links">
+            <a href="https://callingpoint.co.uk">Home</a>
+            <a href="https://callingpoint.co.uk/privacy.html">Privacy Policy</a>
+        </div>
+    </footer>
+</main>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+</body>
+</html>
