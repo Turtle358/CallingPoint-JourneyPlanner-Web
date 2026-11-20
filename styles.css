@@ -41,7 +41,7 @@ body {
 /* Top Dynamic TOC Accent Strip */
 .top-brand-bar {
     width: 100%;
-    height: 16px;
+    height: 32px;
     background-color: var(--brand-accent);
     transition: background-color 0.25s ease;
 }
@@ -267,24 +267,6 @@ body {
     color: var(--text-primary);
 }
 
-.map-btn {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-    background-color: var(--map-btn-bg);
-    color: var(--map-btn-fg);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    flex-shrink: 0;
-    transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-.map-btn:hover {
-    opacity: 0.85;
-    transform: scale(1.03);
-}
 
 /* Change Banner Card */
 .leg-change {
@@ -421,13 +403,6 @@ body {
     align-items: center;
 }
 
-/* Colored TOC Stem above Boarding Node */
-.timeline-stem-top {
-    width: 3px;
-    height: 24px;
-    border-radius: 2px;
-    background-color: var(--brand-accent);
-}
 
 .timeline-line-segment {
     width: 2px;

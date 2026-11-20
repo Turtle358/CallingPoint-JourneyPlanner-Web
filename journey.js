@@ -164,7 +164,6 @@
         return wrap;
     }
 
-
     function extractPayloadToken(rawSource) {
         if (!rawSource) return null;
         let candidate = rawSource.trim();
@@ -222,13 +221,7 @@
             throw new Error('No journey legs found in this link.');
         }
 
-        let lastCheckedLiveTime = root.lastCheckedLiveTime || root.lastUpdated || '';
-
         const legs = rawLegs.map((leg) => {
-            if (!lastCheckedLiveTime && leg.lastCheckedLiveTime) {
-                lastCheckedLiveTime = leg.lastCheckedLiveTime;
-            }
-
             const mode = (leg.transportMode || leg.mode || leg.m || 'TRAIN').toString().toUpperCase();
             const operatorName = leg.operatorName || leg.operator || leg.op || '';
             const operatorCode = leg.operatorCode || leg.tocCode || leg.oc || '';
@@ -236,8 +229,6 @@
             const toName = leg.toStationName || leg.toName || leg.to || leg.t || 'Unknown destination';
             const departTime = leg.departTime || leg.departureTime || leg.scheduledDepartureTime || leg.dt || '';
             const arriveTime = leg.arriveTime || leg.arrivalTime || leg.scheduledArrivalTime || leg.at || '';
-            const liveDepartTime = leg.liveDepartTime || leg.expectedDepartureTime || leg.edt || '';
-            const liveArriveTime = leg.liveArriveTime || leg.expectedArrivalTime || leg.eat || '';
             const departurePlatform = leg.departurePlatform || leg.platform || leg.p || '';
             const arrivalPlatform = leg.arrivalPlatform || leg.ap || '';
             const destination = leg.destination || leg.headsign || leg.trainDestination || leg.dest || toName;
@@ -269,8 +260,6 @@
                 toName,
                 departTime,
                 arriveTime,
-                liveDepartTime,
-                liveArriveTime,
                 departurePlatform,
                 arrivalPlatform,
                 destination,
@@ -287,7 +276,6 @@
             departTime: root.departTime || root.dep || legs[0].departTime || '--:--',
             arriveTime: root.arriveTime || root.arr || legs[legs.length - 1].arriveTime || '--:--',
             duration: root.duration || root.dur || '',
-            lastCheckedLiveTime,
             legs
         };
     }
@@ -327,14 +315,6 @@
         });
     }
 
-    function formatLastUpdated(rawTime) {
-        if (!rawTime) return 'Shared journey snapshot';
-        const numeric = Number(rawTime);
-        const date = Number.isFinite(numeric) && numeric > 0 ? new Date(numeric) : new Date(rawTime);
-        if (Number.isNaN(date.getTime())) return 'Shared journey snapshot';
-        return `Last updated: ${date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
-    }
-
     function buildWalkTitle(leg) {
         const dur = (leg.duration || '').trim();
         if (!dur) return 'Walk';
@@ -346,7 +326,7 @@
         return `https://www.openstreetmap.org/search?query=${query}`;
     }
 
-    function renderTimeAndStatus(scheduledTime, liveTime) {
+    function renderTimeAndStatus(scheduledTime) {
         const container = document.createElement('div');
         container.className = 'station-time-col';
 
@@ -355,23 +335,12 @@
         timeEl.textContent = scheduledTime || '--:--';
 
         const statusEl = document.createElement('div');
-        statusEl.className = 'station-status';
-
-        if (!liveTime || liveTime.toLowerCase() === 'on time' || liveTime === scheduledTime) {
-            statusEl.textContent = 'On time';
-            statusEl.classList.add('status-ontime');
-        } else if (liveTime.toLowerCase() === 'cancelled') {
-            timeEl.classList.add('struck');
-            statusEl.textContent = 'Cancelled';
-            statusEl.classList.add('status-cancelled');
-        } else {
-            timeEl.classList.add('struck');
-            statusEl.textContent = liveTime.startsWith('Exp') ? liveTime : `Exp ${liveTime}`;
-            statusEl.classList.add('status-delayed');
-        }
+        statusEl.className = 'station-status text_secondary';
+        statusEl.textContent = 'Scheduled';
 
         container.appendChild(timeEl);
         container.appendChild(statusEl);
+
         return container;
     }
 
@@ -387,18 +356,8 @@
         title.className = 'transfer-title';
         title.textContent = buildWalkTitle(leg);
 
-        const mapLink = document.createElement('a');
-        mapLink.className = 'map-btn';
-        mapLink.href = buildOsmSearchUrl(leg.fromName, leg.toName);
-        mapLink.target = '_blank';
-        mapLink.rel = 'noopener noreferrer';
-        mapLink.setAttribute('aria-label', `View walking route from ${leg.fromName} to ${leg.toName}`);
-        mapLink.title = 'View route on OpenStreetMap';
-        mapLink.innerHTML = ICONS.map;
-
         card.appendChild(icon);
         card.appendChild(title);
-        card.appendChild(mapLink);
         return card;
     }
 
@@ -492,10 +451,6 @@
 
             const gutter = document.createElement('div');
             gutter.className = 'timeline-gutter';
-            const topStem = document.createElement('div');
-            topStem.className = 'timeline-stem-top';
-            topStem.style.backgroundColor = brand.colour;
-            gutter.appendChild(topStem);
 
             const toggleCell = document.createElement('div');
             toggleCell.className = 'stops-toggle-cell';
@@ -541,12 +496,6 @@
 
         const boardGutter = document.createElement('div');
         boardGutter.className = 'timeline-gutter';
-        if (leg.previousCount === 0) {
-            const stem = document.createElement('div');
-            stem.className = 'timeline-stem-top';
-            stem.style.backgroundColor = brand.colour;
-            boardGutter.appendChild(stem);
-        }
         const boardNode = document.createElement('div');
         boardNode.className = 'timeline-node';
         const boardLine = document.createElement('div');
@@ -568,7 +517,7 @@
             boardMain.appendChild(plat);
         }
 
-        const boardTimeCol = renderTimeAndStatus(leg.departTime, leg.liveDepartTime);
+        const boardTimeCol = renderTimeAndStatus(leg.departTime);
 
         boardRow.appendChild(boardGutter);
         boardRow.appendChild(boardMain);
@@ -647,7 +596,7 @@
             alightMain.appendChild(plat);
         }
 
-        const alightTimeCol = renderTimeAndStatus(leg.arriveTime, leg.liveArriveTime);
+        const alightTimeCol = renderTimeAndStatus(leg.arriveTime);
         alightTimeCol.classList.add('alighting');
 
         alightRow.appendChild(alightGutter);
@@ -750,7 +699,7 @@
 
         const footerStatus = document.getElementById('footer-status');
         if (footerStatus) {
-            footerStatus.textContent = formatLastUpdated(journey.lastCheckedLiveTime);
+            footerStatus.textContent = 'Shared journey snapshot';
             footerStatus.classList.remove('hidden');
         }
 
